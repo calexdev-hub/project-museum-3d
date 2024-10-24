@@ -61,6 +61,9 @@ container.appendChild( renderer.domElement ); // Adiciona o renderizador ao cont
 
 // Adicionar suporte a VR
 renderer.xr.enabled = true; // Habilita o WebXR no renderizador
+// Acessa o primeiro controlador
+const controller1 = renderer.xr.getController(0);
+scene.add(controller1);
 
 // Adiciona o botão VR na página
 document.body.appendChild(VRButton.createButton(renderer)); // Cria e adiciona o botão de VR
@@ -201,6 +204,34 @@ function controls( deltaTime ) {
     }
 }
 
+// Função para detectar o movimento do joystick (thumbstick)
+function handleJoystick(controller) {
+    const gamepad = controller.gamepad;  // Acessa o gamepad do controlador
+
+    if (gamepad && gamepad.axes.length > 0) {
+        // Acessa os valores dos eixos do joystick (thumbstick)
+        const xAxis = gamepad.axes[2];  // Eixo horizontal (esquerda/direita)
+        const yAxis = gamepad.axes[3];  // Eixo vertical (frente/trás)
+
+        // Exibe os valores do joystick para depuração
+        console.log(`Joystick: X: ${xAxis}, Y: ${yAxis}`);
+
+        // Movimenta o jogador baseado no valor dos eixos
+        if (yAxis < -0.1) {
+            playerVelocity.z -= speedDelta;  // Movimenta para frente
+        }
+        if (yAxis > 0.1) {
+            playerVelocity.z += speedDelta;  // Movimenta para trás
+        }
+        if (xAxis < -0.1) {
+            playerVelocity.x -= speedDelta;  // Movimenta para a esquerda
+        }
+        if (xAxis > 0.1) {
+            playerVelocity.x += speedDelta;  // Movimenta para a direita
+        }
+    }
+}
+
 // Função para ocultar o loader após o carregamento
 function hideLoader() {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -263,8 +294,10 @@ function animate() {
         teleportPlayerIfOob(); // Teleporta o jogador caso saia dos limites
     }
 
-    // Renderiza a cena
-    renderer.render( scene, camera );
+    renderer.setAnimationLoop(() => {
+        handleJoystick(controller1);  // Detecta o movimento do joystick no controlador 1
+        renderer.render(scene, camera);  // Renderiza a cena
+    });
 
     // Atualiza as estatísticas de desempenho (FPS)
     stats.update();
