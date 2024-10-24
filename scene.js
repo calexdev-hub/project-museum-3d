@@ -187,15 +187,15 @@ function controls( deltaTime ) {
     if (keyStates['KeyW'] || keyStates['ArrowUp']) {
         playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
     }
-    
+
     if (keyStates['KeyS'] || keyStates['ArrowDown']) {
         playerVelocity.add(getForwardVector().multiplyScalar(-speedDelta));
     }
-    
+
     if (keyStates['KeyA'] || keyStates['ArrowLeft']) {
         playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
     }
-    
+
     if (keyStates['KeyD'] || keyStates['ArrowRight']) {
         playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
     }
