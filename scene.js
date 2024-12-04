@@ -11,7 +11,7 @@ import { Capsule } from 'three/addons/math/Capsule.js'; // Importa a classe Caps
 
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'; // Importa o GUI para criar interfaces gráficas de controle
 
-import { VRButton } from 'three/addons/webxr/VRButton.js'; // Importa o VRButton
+// import { VRButton } from 'three/addons/webxr/VRButton.js'; // Importa o VRButton
 
 
 const clock = new THREE.Clock();
@@ -60,10 +60,10 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping; // Define o mapeamento de to
 container.appendChild( renderer.domElement ); // Adiciona o renderizador ao contêiner HTML
 
 // Adicionar suporte a VR
-renderer.xr.enabled = true; // Habilita o WebXR no renderizador
+// renderer.xr.enabled = true; // Habilita o WebXR no renderizador
 
 // Adiciona o botão VR na página
-document.body.appendChild(VRButton.createButton(renderer)); // Cria e adiciona o botão de VR
+// document.body.appendChild(VRButton.createButton(renderer)); // Cria e adiciona o botão de VR
 
 // Monitoramento de desempenho (FPS)
 const stats = new Stats();
@@ -106,8 +106,9 @@ container.addEventListener( 'mousedown', () => {
 
 document.addEventListener( 'mouseup', () => {
     if ( document.pointerLockElement !== null ) 
-        console.log("Usuário clicou!") // Arremessa a bola
+        console.log("Usuário clicou!") 
 } );
+
 
 // Listener para capturar movimento do mouse e ajustar a rotação da câmera
 document.body.addEventListener( 'mousemove', ( event ) => {
@@ -201,6 +202,114 @@ function controls( deltaTime ) {
     }
 }
 
+let moveX = 0; // Variável global
+let moveY = 0; // Variável global
+
+function initializeJoystick() {
+        const joystickContainer = document.getElementById('joystick-container');
+
+        if (!joystickContainer) {
+            console.error("Contêiner do joystick não encontrado!");
+            return;
+        }
+
+        const joystick = nipplejs.create({
+            zone: joystickContainer,
+            mode: 'static',
+            position: { left: '50px', bottom: '50px' },
+            color: 'white',
+        });
+
+        joystick.on('move', (evt, data) => {
+            if (data.direction) {
+                const angle = data.angle.radian; // Ângulo em radianos
+                const force = data.force;
+
+                // Calcula movimento com base no ângulo e força do joystick
+                moveX = Math.cos(angle) * force; // Eixo lateral
+                moveY = Math.sin(angle) * force; // Eixo frontal
+            }
+        });
+
+        joystick.on('end', () => {
+            moveX = 0;
+            moveY = 0;
+        });
+
+        console.log("Joystick inicializado.");
+}
+
+function initializeTouchControls() {
+        let isDragging = false;
+        let previousTouchX = 0;
+        let previousTouchY = 0;
+
+        container.addEventListener('touchstart', (event) => {
+            isDragging = true;
+            const touch = event.touches[0];
+            previousTouchX = touch.clientX;
+            previousTouchY = touch.clientY;
+        });
+
+        container.addEventListener('touchmove', (event) => {
+            if (isDragging) {
+                const touch = event.touches[0];
+                const deltaX = touch.clientX - previousTouchX;
+                const deltaY = touch.clientY - previousTouchY;
+
+                camera.rotation.y -= deltaX / 500; // Ajusta a rotação no eixo Y
+                camera.rotation.x -= deltaY / 500; // Ajusta a rotação no eixo X
+
+                // Limita a rotação vertical da câmera
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+                previousTouchX = touch.clientX;
+                previousTouchY = touch.clientY;
+            }
+        });
+
+        container.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        console.log("Controle de toque habilitado para dispositivos móveis.");
+}
+
+
+function getForwardVectorJoystick() {
+    const forward = new THREE.Vector3();
+    camera.getWorldDirection(forward); // Direção da câmera no mundo
+    forward.y = 0; // Ignora a componente vertical
+    forward.normalize(); // Normaliza o vetor para garantir magnitude 1
+    return forward;
+}
+
+function getSideVectorJoystick() {
+    const side = new THREE.Vector3();
+    camera.getWorldDirection(side); // Direção da câmera no mundo
+    side.y = 0; // Ignora a componente vertical
+    side.normalize();
+    side.cross(camera.up); // Calcula o vetor lateral
+    return side;
+}
+
+function updatePlayerFromJoystick(deltaTime) {
+    const speed = 5; // Velocidade do jogador
+
+    // Obtém a direção para frente e lateral com base na câmera
+    const forwardVector = getForwardVectorJoystick();
+    const sideVector = getSideVectorJoystick();
+
+    // Calcula o movimento do jogador baseado no joystick
+    const moveForward = forwardVector.clone().multiplyScalar(moveY * speed * deltaTime);
+    const moveSideways = sideVector.clone().multiplyScalar(moveX * speed * deltaTime);
+
+    // Atualiza a velocidade do jogador
+    playerVelocity.add(moveForward);
+    playerVelocity.add(moveSideways);
+}
+
+
 // Função para ocultar o loader após o carregamento
 function hideLoader() {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -210,7 +319,11 @@ function hideLoader() {
 // Carrega o modelo GLTF do mundo 3D
 const loader = new GLTFLoader().setPath( './models/gltf/' );
 
-loader.load('museu.glb', (gltf) => {
+// Recupera o caminho do modelo do atributo 'data-model'
+const sceneContainer = document.getElementById('scene-container');
+const modelPath = sceneContainer?.getAttribute('data-model') || 'default.glb';
+
+loader.load(modelPath, (gltf) => {
     scene.add(gltf.scene); // Adiciona o modelo à cena
     worldOctree.fromGraphNode(gltf.scene); // Gera a Octree a partir do modelo GLTF
 
@@ -236,9 +349,19 @@ loader.load('museu.glb', (gltf) => {
         helper.visible = value; // Ativa/desativa o helper da Octree
     });
 
+    
+
     // Esconda o loader após o carregamento dos recursos
     hideLoader();
+    if (window.innerWidth <= 1200) {
+        initializeJoystick();
+        initializeTouchControls();
+    } else {
+        console.log("Joystick não necessário para esta resolução.");
+    }
 });
+
+
 
 // Teleporta o jogador para uma posição segura se ele cair fora dos limites do mundo
 function teleportPlayerIfOob() {
@@ -253,20 +376,15 @@ function teleportPlayerIfOob() {
 
 // Função de animação principal
 function animate() {
+    const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
 
-    const deltaTime = Math.min( 0.05, clock.getDelta() ) / STEPS_PER_FRAME;
-
-    // Executa múltiplos subpassos por frame para garantir a detecção precisa de colisões
-    for ( let i = 0; i < STEPS_PER_FRAME; i ++ ) {
-        controls( deltaTime ); // Atualiza o controle do jogador
-        updatePlayer( deltaTime ); // Atualiza o jogador
-        teleportPlayerIfOob(); // Teleporta o jogador caso saia dos limites
+    for (let i = 0; i < STEPS_PER_FRAME; i++) {
+        controls(deltaTime); // Controle baseado em teclado
+        updatePlayerFromJoystick(deltaTime); // Controle baseado no joystick
+        updatePlayer(deltaTime); // Atualiza posição do jogador
+        teleportPlayerIfOob(); // Teleporta se o jogador cair fora do mapa
     }
 
-    // Renderiza a cena
-    renderer.render( scene, camera );
-
-    // Atualiza as estatísticas de desempenho (FPS)
+    renderer.render(scene, camera);
     stats.update();
-
 }

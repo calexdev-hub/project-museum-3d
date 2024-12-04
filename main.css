@@ -89,3 +89,15 @@ a, button, input, select {
 	margin-top: 20px;
 	padding: 10px;
 }
+
+
+@media only screen and (max-width: 768px) {
+    #joystick-container {
+        display: block;
+    }
+
+    #loadingScreen {
+        font-size: 18px; /* Texto menor para telas menores */
+    }
+}
+

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+	<head>
+		<title>Praca Virtual</title>
+		<meta charset=utf-8 />
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+        /* Estilo básico para o loader */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Fundo semi-transparente */
+            display: flex;
+            flex-direction: column; /* Colocar o texto e a imagem em coluna */
+            align-items: center; /* Centraliza horizontalmente */
+            justify-content: center; /* Centraliza verticalmente */
+            color: white;
+            font-size: 24px;
+            z-index: 9999; /* Garantir que o loader fique no topo */
+        }
+
+        /* Estilo do texto animado */
+        #loadingText {
+            animation: pulse 2s infinite; /* Animação de pulsação */
+        }
+
+        /* Estilo da imagem */
+        #loadingImage {
+            margin-top: 20px; /* Espaço entre o texto e a imagem */
+            width: 500px; /* Define a largura da imagem */
+            height: auto; /* Mantém a proporção da imagem */
+        }
+
+        /* Animação de pulsação para o texto */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+		</style>
+	</head>
+	<body>
+        <script src="https://cdn.jsdelivr.net/npm/nipplejs@0.9.0/dist/nipplejs.min.js"></script>
+		<div id="loadingScreen">
+			<div id="loadingText">Carregando, por favor aguarde...</div>
+			<img id="loadingImage" src="./resources/images/controls.png" alt="controls">
+		</div>
+		<div id="container"></div>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./three/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+        <div id="scene-container" data-model="/praca/praca.gltf"></div>
+		<script type="module" src="./scene.js"></script>
+        <div id="joystick-container" style="position: absolute; bottom: 50px; left: 50px; z-index: 10;"></div>
+	</body>
+</html>

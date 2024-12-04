@@ -43,6 +43,7 @@
         }
 		</style>
 	</head>
+    <script src="https://cdn.jsdelivr.net/npm/nipplejs@0.9.0/dist/nipplejs.min.js"></script>
 	<body>
 		<div id="loadingScreen">
 			<div id="loadingText">Carregando, por favor aguarde...</div>
@@ -58,6 +59,8 @@
 				}
 			}
 		</script>
+        <div id="scene-container" data-model="museu/museu.gltf"></div>
 		<script type="module" src="./scene.js"></script>
+        <div id="joystick-container" style="position: absolute; bottom: 50px; left: 50px; z-index: 10;"></div>
 	</body>
 </html>
