@@ -353,7 +353,7 @@ loader.load(modelPath, (gltf) => {
 
     // Esconda o loader após o carregamento dos recursos
     hideLoader();
-    if (window.innerWidth <= 1200) {
+    if (window.innerWidth <= 1280) {
         initializeJoystick();
         initializeTouchControls();
     } else {

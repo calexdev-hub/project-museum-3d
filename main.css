@@ -91,7 +91,7 @@ a, button, input, select {
 }
 
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 1280px) {
     #joystick-container {
         display: block;
     }
