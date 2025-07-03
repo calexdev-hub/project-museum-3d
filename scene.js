@@ -69,7 +69,7 @@ container.appendChild( renderer.domElement ); // Adiciona o renderizador ao cont
 const stats = new Stats();
 stats.domElement.style.position = 'absolute';
 stats.domElement.style.top = '0px';
-container.appendChild( stats.domElement );
+// container.appendChild( stats.domElement );
 
 // Constantes de gravidade e configuração das esferas
 const GRAVITY = 30;
@@ -344,10 +344,10 @@ loader.load(modelPath, (gltf) => {
     scene.add(helper);
 
     // GUI para ativar/desativar a visualização da Octree
-    const gui = new GUI({ width: 200 });
-    gui.add({ debug: false }, 'debug').onChange(function (value) {
-        helper.visible = value; // Ativa/desativa o helper da Octree
-    });
+    // const gui = new GUI({ width: 200 });
+    // gui.add({ debug: false }, 'debug').onChange(function (value) {
+    //     helper.visible = value; // Ativa/desativa o helper da Octree
+    // });
 
     
 
@@ -386,5 +386,5 @@ function animate() {
     }
 
     renderer.render(scene, camera);
-    stats.update();
+    // stats.update();
 }
